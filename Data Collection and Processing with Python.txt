@@ -1,0 +1,184 @@
+import requests
+import json
+import requests_with_caching
+
+def get_movies_from_tastedive(string):
+    baseURL = 'https://tastedive.com/api/similar'
+    params = {}
+    params['q'] = string
+    params['type'] = 'movies'
+    params['limit'] = '5'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+ 
+#print(json.loads(get_movies_from_tastedive("Bridesmaids").text))
+
+# get_movies_from_tastedive("Bridesmaids")
+get_movies_from_tastedive("Bridesmaids")
+# get_movies_from_tastedive("Black Panther")
+get_movies_from_tastedive("Black Panther")
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+# some invocations that we use in the automated tests; uncomment these if you are getting errors and want better error messages
+import requests
+import json
+import requests_with_caching
+
+def get_movies_from_tastedive(string):
+    baseURL = 'https://tastedive.com/api/similar'
+    params = {}
+    params['q'] = string
+    params['type'] = 'movies'
+    params['limit'] = '5'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+
+def extract_movie_titles(dic):
+    film = dic["Similar"]["Results"]
+    lst = [i["Name"] for i in film]
+    return lst
+
+extract_movie_titles(get_movies_from_tastedive("Tony Bennett"))
+----------------------------------------------------------------------------------------------------------------------------
+import requests
+import json
+import requests_with_caching
+
+def get_movies_from_tastedive(string):
+    baseURL = 'https://tastedive.com/api/similar'
+    params = {}
+    params['q'] = string
+    params['type'] = 'movies'
+    params['limit'] = '5'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+
+def extract_movie_titles(dic):
+    film = dic["Similar"]["Results"]
+    lst = [i["Name"] for i in film]
+    return lst
+
+def get_related_titles(lt):
+    final_list = []
+    for m in lt:
+        for i in get_movies_from_tastedive(m)["Similar"]["Results"]:
+            if i["Name"] not in final_list:
+                final_list.append(i["Name"])
+    return final_list
+
+print(get_related_titles(["Black Panther", "Captain Marvel"]))
+#get_related_titles([])
+---------------------------------------------------------------------------------------------------------------------
+
+import requests
+import requests_with_caching
+import json
+
+def get_movie_data(string):
+    baseURL = 'http://www.omdbapi.com/'
+    params = {}
+    params['t'] = string
+    params['r'] = 'json'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+
+get_movie_data("Venom")
+get_movie_data("Baby Mama")
+------------------------------------------------------------------------------------------------------------------------------------
+import requests
+import requests_with_caching
+import json
+
+def get_movie_data(string):
+    baseURL = 'http://www.omdbapi.com/'
+    params = {}
+    params['t'] = string
+    params['r'] = 'json'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+
+def get_movie_rating(dic):
+   # try:
+    rank = float(dic["Ratings"][1]["Value"])
+    #except:
+     #   rank = 0.0
+    return rank    
+     
+print(get_movie_data("Deadpool 2"))
+----------------------------------------------------------------------------------------------------------------------
+import requests
+import requests_with_caching
+import json
+
+def get_movie_data(string):
+    baseURL = 'http://www.omdbapi.com/'
+    params = {}
+    params['t'] = string
+    params['r'] = 'json'
+    data = requests_with_caching.get(baseURL, params = params, permanent_cache_file ='permanent_cache.txt' )
+    return data.json()
+
+def get_movie_rating(dic):
+    try:
+        rank = int(dic["Ratings"][1]["Value"].strip('%'))
+    except:
+        rank = 0.0
+    return rank    
+     
+print(get_movie_rating(get_movie_data("Black Panther")))
+print(get_movie_rating(get_movie_data("Venom")))
+print(get_movie_rating(get_movie_data("Baby Mama")))
+-------------------------------------------------------------------------------------------------------------------------
+
+
+import requests
+import requests_with_caching
+import json
+
+def get_movies_from_tastedive(string):
+    baseURL = 'https://tastedive.com/api/similar'
+    params = {}
+    params['q'] = string
+    params['type'] = 'movies'
+    params['limit'] = '5'
+    data = requests_with_caching.get(baseURL, params = params)
+    return data.json()
+
+def extract_movie_titles(dic):
+    film = dic["Similar"]["Results"]
+    lst = [i["Name"] for i in film]
+    return lst
+
+def get_related_titles(lt):
+    final_list = []
+    for m in lt:
+        for i in get_movies_from_tastedive(m)["Similar"]["Results"]:
+            if i["Name"] not in final_list:
+                final_list.append(i["Name"])
+    return final_list
+
+def get_movie_data(string):
+    baseURL = 'http://www.omdbapi.com/'
+    params = {}
+    params['t'] = string
+    params['r'] = 'json'
+    data = requests_with_caching.get(baseURL, params = params, permanent_cache_file ='permanent_cache.txt' )
+    return data.json()
+
+def get_movie_rating(dic):
+    try:
+        rank = int(dic["Ratings"][1]["Value"].strip('%'))
+    except:
+        rank = 0.0
+    return rank 
+
+
+def get_sorted_recommendations(lst):
+    final_list = get_related_titles(lst)
+    final_list = sorted(final_list, key= lambda x: (-get_movie_rating(get_movie_data(x)),x) , reverse= True)
+    return final_list
+
+#print(get_sorted_recommendations(["Black Panther", "Captain Marvel"]))
+print(get_sorted_recommendations(["Bridesmaids", "Sherlock Holmes"]))

@@ -1,0 +1,40 @@
+import numpy as np
+np.set_printoptions(precision=2)
+import matplotlib.pyplot as plt
+plt.style.use('seaborn-darkgrid')
+import math
+
+x = np.arange(0,10,1)
+y = np.cos(x / 2)
+fig = plt.figure(figsize=(16,4))
+ax = fig.subplots()
+ax.scatter(x,y, marker='x', c='orange', label='real data')
+plt.show()
+
+x_m = np.c_[x, x**2, x**3, x**4, x**5, x**6, x**7, x**8, x**9, x**10, x**11, x**12, x**13, x**14, x**15, x**16]
+x_m = (x_m - np.mean(x_m, axis= 0)) / np.std(x_m, axis= 0)
+m = x_m.shape[0]
+n = x_m.shape[1]
+def prediction(x, y, alpha, iterator, w=np.ones(n), b=np.ones(m)):
+    MSE = []
+    for i in range(iterator):
+        y_predict = x_m @ w.reshape(n,) + b.reshape(m,)
+        J = np.sum((y_predict - y)**2)/(2*m)
+        MSE.append(J)
+        e_w = np.dot((y_predict - y).reshape(1,m), x_m)
+        e_b = y_predict - y
+        w = w - alpha/m * e_w
+        b = b - alpha/m * e_b
+        if i % math.ceil(iterator/10) ==0:
+            print(f'iterator{i} with cost {J}')
+    return y_predict, MSE, w, b
+    
+    fig = plt.figure(figsize = (16,4))
+ax1, ax2 = fig.subplots(1,2)
+y_p = prediction(x_m, y, 1e-2, 10000)
+ax1.scatter(x, y, marker='x', c='orange', label='target')
+ax1.plot(x, y_p[0] , c='darkgreen', label ='prediction')
+ax1.legend()
+ax2.plot(np.arange(10000), y_p[1])
+fig.suptitle('Well Done Shima Junam')
+plt.show()

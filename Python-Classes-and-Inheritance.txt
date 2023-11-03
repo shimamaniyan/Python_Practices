@@ -1,0 +1,69 @@
+
+VOWEL_COST = 250
+LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+VOWELS = 'AEIOU'
+import random
+
+# Write the WOFPlayer class definition (part A) here
+class WOFPlayer():
+    def __init__(self, name):
+        self.name = name
+        self.prizeMoney = 0
+        self.prizes = []
+    
+    def addMoney(self, amt):
+        self.prizeMoney += amt
+        
+    def goBankrupt(self):
+        self.prizeMoney = 0
+    
+    def addPrize(self, prize):
+        self.prizes.append(prize)
+        
+    def __str__(self):
+        return f'{self.name} (${self.prizeMoney})'
+# Write the WOFHumanPlayer class definition (part B) here
+class WOFHumanPlayer(WOFPlayer):        
+    def getMove(self, category, obscuredPhrase, guessed):
+        tmp = input(f"""{self.name} has ${self.prizeMoney}
+        Category: {category}
+        Phrase:  {obscured_phrase}
+        Guessed: {guessed}
+
+        Guess a letter, phrase, or type 'exit' or 'pass':""")
+        return tmp
+        
+# Write the WOFComputerPlayer class definition (part C) here
+class WOFComputerPlayer(WOFPlayer):
+    SORTED_FREQUENCIES = 'ZQXJKVBPYGFWMUCLDRHSNIOATE'
+    def __init__(self, name, difficulty,):
+        WOFPlayer.__init__(self, name)
+        self.difficulty = difficulty
+        
+    def smartCoinFlip(self):
+        r = random.randint(1, 10)
+        if r > self.difficulty:
+            return False
+        elif r <= self.difficulty:
+            return True
+        
+    def getPossibleLetters(self, guessed):
+        possible_l = []
+        for l in LETTERS:
+            if l not in guessed:
+                if l not in VOWELS:
+                    possible_l.append(l)
+                elif l in VOWELS and self.prizeMoney >= VOWEL_COST:
+                    possible_l.append(l)
+        return possible_l
+                
+    def getMove(self, category, obscuredPhrase, guessed):
+        if self.smartCoinFlip() == True:
+            for l in SORTED_FREQUENCIES[::-1]:
+                if l in self.getPossibleLetters(guessed):
+                    return str(l)
+        elif self.smartCoinFlip() == False:
+            return str(random.choice(self.getPossibleLetters(guessed)))
+        elif self.getPossibleLetters(guessed) == []:
+            return 'pass'
+            

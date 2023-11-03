@@ -1,0 +1,46 @@
+import PIL
+from PIL import Image, ImageFilter, ImageDraw, ImageFont
+from PIL import ImageEnhance
+from IPython.display import display
+
+# read image and convert to RGB
+image=Image.open("readonly/msi_recruitment.gif")
+image=image.convert('RGB')
+print(image.width, image.height)
+display(image)
+-------------------------------------------------
+def Turn_Color(num, color_num):
+    pic= image.copy()
+    for i in range(pic.size[0]):
+        for j in range(pic.size[1]):
+            color = list(pic.getpixel((i,j)))
+            color[color_num] = int(color[color_num] * num)
+            pixels = pic.load()
+            pixels[i,j] = (color[0], color[1], color[2])
+    return pic
+-------------------------------------------------
+Canvas = Image.new(mode='RGB', size=(image.width * 3, image.height*3 + 150))
+-------------------------------------------------
+x = 0
+y = 0
+num = 0.1
+color = 0
+channel_num = 0
+for i in range(9):
+    pic_i = Turn_Color( num, color)
+    Canvas.paste(pic_i, (x,y))
+    draw = ImageDraw.Draw(Canvas)
+    txt = f'channel {channel_num} intensity {num}'
+    f = ImageFont.truetype('readonly/fanwood-webfont.ttf', 60)
+    draw.text((x,y + pic_i.height), text=txt, font= f)
+    if Canvas.width == (x + image.width):
+        x = 0
+        y = y + image.height + 50
+        num = 0.1
+        color += 1
+        channel_num += 1
+    else:
+        x += image.width
+        num += 0.4
+---------------------------------------------------
+display(Canvas)
